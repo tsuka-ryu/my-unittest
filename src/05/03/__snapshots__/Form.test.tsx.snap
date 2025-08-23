@@ -1,0 +1,21 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Snapshot: アカウント名「taro」が表示される 1`] = `
+<div>
+  <form>
+    <h2>
+      アカウント情報
+    </h2>
+    <p>
+      taro
+    </p>
+    <div>
+      <button
+        type="submit"
+      >
+        編集する
+      </button>
+    </div>
+  </form>
+</div>
+`;
