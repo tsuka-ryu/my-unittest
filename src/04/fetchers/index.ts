@@ -10,17 +10,20 @@ async function handleResponse(res: Response) {
 
 const host = (path: string) => `https://myapi.testing.com${path}`;
 
-export function getMyProfile(): Promise<Profile> {
-  return fetch(host("/my/profile")).then(handleResponse);
+export async function getMyProfile(): Promise<Profile> {
+  const res = await fetch(host("/my/profile"));
+  return handleResponse(res);
 }
 
-export function getMyArticles(): Promise<Articles> {
-  return fetch(host("/my/articles")).then(handleResponse);
+export async function getMyArticles(): Promise<Articles> {
+  const res = await fetch(host("/my/articles"));
+  return handleResponse(res);
 }
 
-export function postMyArticle(input: ArticleInput): Promise<Article> {
-  return fetch(host("/my/articles"), {
+export async function postMyArticle(input: ArticleInput): Promise<Article> {
+  const res = await fetch(host("/my/articles"), {
     method: "POST",
     body: JSON.stringify(input),
-  }).then(handleResponse);
+  });
+  return handleResponse(res);
 }
