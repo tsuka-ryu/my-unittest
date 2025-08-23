@@ -21,6 +21,7 @@ export default defineConfig({
         ],
         test: {
           name: "storybook",
+          include: ["**/*.{stories}.{tsx}"],
           browser: {
             enabled: true,
             headless: true,
@@ -28,6 +29,27 @@ export default defineConfig({
             instances: [{ browser: "chromium" }],
           },
           setupFiles: [".storybook/vitest.setup.js"],
+        },
+      },
+      {
+        test: {
+          name: "unit",
+          include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,tsx,jsx}"],
+          exclude: ["**/*.{stories}.{tsx}", "**/*.browser.test.*", "node_modules/**"],
+          // browser modeを無効にして通常のNode.js環境でテスト実行
+        },
+      },
+      {
+        test: {
+          name: "browser",
+          include: ["src/**/*.browser.test.*"],
+          exclude: ["**/__snapshots__/**"],
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: "playwright",
+            instances: [{ browser: "chromium" }],
+          },
         },
       },
     ],
