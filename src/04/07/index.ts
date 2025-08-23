@@ -1,5 +1,5 @@
-export function greetByTime() {
-  const hour = new Date().getHours();
+export function greetByTime(now = new Date()) {
+  const hour = now.getHours();
   if (hour < 12) {
     return "おはよう";
   } else if (hour < 18) {
