@@ -1,5 +1,3 @@
-// TODO: browser modeと通常の.tsのテストが混在する場合のvitestの設定を考える必要がある
-
 import { expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import { Form } from "./Form";
