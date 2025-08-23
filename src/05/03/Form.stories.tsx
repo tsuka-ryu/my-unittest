@@ -4,13 +4,10 @@ import { Form } from "./Form";
 
 const meta = {
   component: Form,
+  args: { name: "John Doe" },
 } satisfies Meta<typeof Form>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {
-  args: {
-    name: "John Doe",
-  },
-};
+export const Primary: Story = {};
