@@ -21,7 +21,6 @@ export default defineConfig({
         ],
         test: {
           name: "storybook",
-          include: ["**/*.{stories}.{tsx}"],
           browser: {
             enabled: true,
             headless: true,
