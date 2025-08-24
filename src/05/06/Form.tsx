@@ -8,6 +8,7 @@ export type AddressOption = React.ComponentProps<"option"> & { id: string };
 export type Props = {
   deliveryAddresses?: AddressOption[];
   onSubmit?: (event: React.FormEvent<HTMLFormElement>) => void;
+  buttonType?: "submit" | "button";
 };
 export const Form = (props: Props) => {
   const [registerNew, setRegisterNew] = useState<boolean | undefined>(
@@ -34,7 +35,10 @@ export const Form = (props: Props) => {
       )}
       <hr />
       <div>
-        <button type="button">注文内容の確認へ進む</button>
+        {/* FIXME: 06のテストでは"button"じゃないとうまくいかないが、07のテストではsubmitじゃないとうまくいかないのでいい感じにしたい--- IGNORE --- */}
+        <button type={props.buttonType || "button"}>
+          注文内容の確認へ進む
+        </button>
       </div>
     </form>
   );

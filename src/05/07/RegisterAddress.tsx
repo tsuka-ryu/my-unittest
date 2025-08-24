@@ -27,6 +27,7 @@ export const RegisterAddress = () => {
             setPostResult("不明なエラーが発生しました");
           }
         })}
+        buttonType="submit"
       />
       {postResult && <p>{postResult}</p>}
     </div>
