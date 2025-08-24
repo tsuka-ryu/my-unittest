@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { HttpResponse, http } from "msw";
 import { expect, within } from "storybook/test";
 import { host } from "./fetchers";
-import { postMyAddressMock } from "./fetchers/fixtures";
+import { httpError, postMyAddressMock } from "./fetchers/fixtures";
 import { RegisterAddress } from "./RegisterAddress";
 import {
   clickSubmit,
@@ -25,7 +25,6 @@ async function fillValuesAndSubmit(canvas: ReturnType<typeof within>) {
   return submitValues;
 }
 
-// TODO: テストの実装
 export const Success: Story = {
   parameters: {
     msw: {
@@ -46,38 +45,27 @@ export const Success: Story = {
   },
 };
 
-// export const ServerError: Story = {
-//   play: async ({ canvasElement, step }) => {
-//     const canvas = within(canvasElement);
-//     mockPostMyAddress(500);
+export const ServerError: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(host("/my/address"), () => {
+          return HttpResponse.json(httpError, { status: 500 }); // TODO: エラーの返し方これであってるのかしら
+        }),
+      ],
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
 
-//     await step(
-//       "サーバーエラーが発生すると失敗メッセージが表示される",
-//       async () => {
-//         const nameInput = canvas.getByLabelText("氏名");
-//         const phoneInput = canvas.getByLabelText("電話番号");
-//         const postalCodeInput = canvas.getByLabelText("郵便番号");
-//         const prefecturesInput = canvas.getByLabelText("都道府県");
-//         const municipalitiesInput = canvas.getByLabelText("市区町村");
-//         const streetNumberInput = canvas.getByLabelText("番地番号");
-//         const submitButton = canvas.getByRole("button", { name: "送信" });
+    await step("失敗時「登録に失敗しました」が表示される", async () => {
+      await fillValuesAndSubmit(canvas);
+      expect(canvas.getByText("登録に失敗しました")).toBeInTheDocument();
+    });
+  },
+};
 
-//         await userEvent.type(nameInput, "田中太郎");
-//         await userEvent.type(phoneInput, "090-1234-5678");
-//         await userEvent.type(postalCodeInput, "167-0051");
-//         await userEvent.type(prefecturesInput, "東京都");
-//         await userEvent.type(municipalitiesInput, "杉並区荻窪1");
-//         await userEvent.type(streetNumberInput, "00-00");
-//         await userEvent.click(submitButton);
-
-//         await waitFor(async () => {
-//           expect(canvas.getByText("登録に失敗しました")).toBeInTheDocument();
-//         });
-//       }
-//     );
-//   },
-// };
-
+// TODO: テストの実装
 // export const ValidationError: Story = {
 //   play: async ({ canvasElement, step }) => {
 //     const canvas = within(canvasElement);
