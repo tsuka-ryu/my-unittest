@@ -8,7 +8,7 @@ async function handleResponse(res: Response) {
   return data;
 }
 
-const host = (path: string) => `https://myapi.testing.com${path}`;
+export const host = (path: string) => `https://myapi.testing.com${path}`;
 
 const headers = {
   Accept: "application/json",

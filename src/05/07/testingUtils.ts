@@ -1,4 +1,4 @@
-import { userEvent, type within } from "storybook/test";
+import { fn, userEvent, within } from "storybook/test";
 
 export async function inputContactNumber(
   canvas: ReturnType<typeof within>,
@@ -47,7 +47,6 @@ export async function inputDeliveryAddress(
 }
 
 export async function clickSubmit(canvas: ReturnType<typeof within>) {
-  console.log("Submitting form...");
   await userEvent.click(
     canvas.getByRole("button", { name: "注文内容の確認へ進む" })
   );

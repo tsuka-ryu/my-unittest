@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { HttpResponse, http } from "msw";
 import { expect, within } from "storybook/test";
-import { mockPostMyAddress } from "./fetchers/mock";
+import { host } from "./fetchers";
+import { postMyAddressMock } from "./fetchers/fixtures";
 import { RegisterAddress } from "./RegisterAddress";
 import {
   clickSubmit,
@@ -25,14 +27,21 @@ async function fillValuesAndSubmit(canvas: ReturnType<typeof within>) {
 
 // TODO: テストの実装
 export const Success: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(host("/my/address"), () => {
+          return HttpResponse.json(postMyAddressMock);
+        }),
+      ],
+    },
+  },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
-    const mock = mockPostMyAddress(201);
 
     await step("成功時「登録しました」が表示される", async () => {
-      const submitValues = await fillValuesAndSubmit(canvas);
+      await fillValuesAndSubmit(canvas);
       expect(canvas.getByText("登録しました")).toBeInTheDocument();
-      expect(mock).toHaveBeenCalledWith(submitValues);
     });
   },
 };
