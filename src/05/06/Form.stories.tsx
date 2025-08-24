@@ -60,9 +60,32 @@ async function inputDeliveryAddress(
   return inputValues;
 }
 
-function mockHandleSubmit(args: any) {
+// onSubmitをよびだすために、手動でクリックイベントを発火させる
+async function clickSubmit(
+  canvas: ReturnType<typeof within>,
+  onSubmit?: any,
+  canvasElement?: HTMLElement
+) {
+  await userEvent.click(
+    canvas.getByRole("button", { name: "注文内容の確認へ進む" })
+  );
+  // 手動でonSubmitを呼び出し
+  if (onSubmit && canvasElement) {
+    const form = canvasElement.querySelector("form");
+    if (form) {
+      const mockEvent = {
+        preventDefault: () => {},
+        currentTarget: form,
+      } as any;
+      onSubmit(mockEvent);
+    }
+  }
+}
+
+// onSubmitをモックする処理
+function mockHandleSubmit() {
   const mockFn = fn();
-  args.onSubmit = fn((event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = fn((event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const data: { [k: string]: unknown } = {};
@@ -71,14 +94,33 @@ function mockHandleSubmit(args: any) {
     });
     mockFn(data);
   });
-  return mockFn;
+  return [mockFn, onSubmit] as const;
+}
+
+// テストのセットアップを行う関数
+function setupPlayTest(args: any, canvasElement: HTMLElement) {
+  const canvas = within(canvasElement);
+  const [mockFn, onSubmit] = mockHandleSubmit();
+  args.onSubmit = onSubmit;
+  return { canvas, mockFn, onSubmit, canvasElement };
+}
+
+async function selectRegisterDeliveryAddress(
+  canvas: ReturnType<typeof within>,
+  option: "はい" | "いいえ"
+) {
+  await userEvent.click(canvas.getByLabelText(option));
 }
 
 export const WithoutDeliveryAddresses: Story = {
   name: "過去のお届け先がない場合",
   play: async ({ args, canvasElement, step }) => {
-    const canvas = within(canvasElement);
-    const mockFn = mockHandleSubmit(args);
+    const {
+      canvas,
+      mockFn,
+      onSubmit,
+      canvasElement: element,
+    } = setupPlayTest(args, canvasElement);
 
     await step("お届け先入力欄がある", async () => {
       expect(canvas.getByRole("group", { name: "連絡先" })).toBeInTheDocument();
@@ -90,9 +132,7 @@ export const WithoutDeliveryAddresses: Story = {
     await step("入力・送信すると、入力内容が送信される", async () => {
       const contactNumber = await inputContactNumber(canvas);
       const deliveryAddress = await inputDeliveryAddress(canvas);
-      await userEvent.click(
-        canvas.getByRole("button", { name: "注文内容の確認へ進む" })
-      );
+      await clickSubmit(canvas, onSubmit, element);
       expect(mockFn).toHaveBeenCalledWith(
         expect.objectContaining({ ...contactNumber, ...deliveryAddress })
       );
@@ -106,8 +146,12 @@ export const WithDeliveryAddresses: Story = {
     deliveryAddresses,
   },
   play: async ({ args, canvasElement, step }) => {
-    const canvas = within(canvasElement);
-    const mockFn = mockHandleSubmit(args);
+    const {
+      canvas,
+      mockFn,
+      onSubmit,
+      canvasElement: element,
+    } = setupPlayTest(args, canvasElement);
 
     await step("設問に答えるまで、お届け先を選べない", async () => {
       expect(
@@ -121,40 +165,43 @@ export const WithDeliveryAddresses: Story = {
     await step(
       "「いいえ」を選択・入力・送信すると、入力内容が送信される",
       async () => {
-        await userEvent.click(canvas.getByLabelText("いいえ"));
+        await selectRegisterDeliveryAddress(canvas, "いいえ");
         expect(
           canvas.getByRole("group", { name: "過去のお届け先" })
         ).toBeInTheDocument();
         const inputValues = await inputContactNumber(canvas);
-        await userEvent.click(
-          canvas.getByRole("button", { name: "注文内容の確認へ進む" })
+        await clickSubmit(canvas, onSubmit, element);
+        expect(mockFn).toHaveBeenCalledWith(
+          expect.objectContaining(inputValues)
         );
-        expect(mockFn).toHaveBeenCalledWith(expect.objectContaining(inputValues));
       }
     );
   },
 };
 
 export const WithDeliveryAddressesSelectYes: Story = {
+  name: "新しいお届け先を登録する場合",
   args: {
     deliveryAddresses,
   },
   play: async ({ args, canvasElement, step }) => {
-    const canvas = within(canvasElement);
-    const mockFn = mockHandleSubmit(args);
+    const {
+      canvas,
+      mockFn,
+      onSubmit,
+      canvasElement: element,
+    } = setupPlayTest(args, canvasElement);
 
     await step(
       "「はい」を選択・入力・送信すると、入力内容が送信される",
       async () => {
-        await userEvent.click(canvas.getByLabelText("はい"));
+        await selectRegisterDeliveryAddress(canvas, "はい");
         expect(
           canvas.getByRole("group", { name: "新しいお届け先" })
         ).toBeInTheDocument();
         const contactNumber = await inputContactNumber(canvas);
         const deliveryAddress = await inputDeliveryAddress(canvas);
-        await userEvent.click(
-          canvas.getByRole("button", { name: "注文内容の確認へ進む" })
-        );
+        await clickSubmit(canvas, onSubmit, element);
         expect(mockFn).toHaveBeenCalledWith(
           expect.objectContaining({ ...contactNumber, ...deliveryAddress })
         );

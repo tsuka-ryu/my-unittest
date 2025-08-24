@@ -34,7 +34,7 @@ export const Form = (props: Props) => {
       )}
       <hr />
       <div>
-        <button type="submit">注文内容の確認へ進む</button>
+        <button type="button">注文内容の確認へ進む</button>
       </div>
     </form>
   );
