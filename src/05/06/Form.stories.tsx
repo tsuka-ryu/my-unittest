@@ -209,3 +209,40 @@ export const WithDeliveryAddressesSelectYes: Story = {
     );
   },
 };
+
+// COMMENT
+// 全体的にゴチャついてしまってわかりにくい
+// おそらく、もとの処理に合わせてtoHaveBeenCalledWithを使ったから。シンプルにtoHaveBeenCalledのみであれば、もっとスッキリする
+// ↓はそのバージョンで書く
+export const WithDeliveryAddressesSelectYes2: Story = {
+  name: "新しいお届け先を登録する場合",
+  args: {
+    deliveryAddresses,
+  },
+  play: async ({ args, canvasElement, step }) => {
+    // Arrange
+    const {
+      canvas,
+      mockFn,
+      onSubmit,
+      canvasElement: element,
+    } = setupPlayTest(args, canvasElement);
+
+    await step(
+      "「はい」を選択・入力・送信すると、入力内容が送信される",
+      async () => {
+        // Act
+        await selectRegisterDeliveryAddress(canvas, "はい");
+        expect(
+          canvas.getByRole("group", { name: "新しいお届け先" })
+        ).toBeInTheDocument();
+        await inputContactNumber(canvas);
+        await inputDeliveryAddress(canvas);
+        await clickSubmit(canvas, onSubmit, element);
+
+        // Assert
+        expect(mockFn).toHaveBeenCalled();
+      }
+    );
+  },
+};
