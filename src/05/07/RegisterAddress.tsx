@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Form } from "../06/Form";
 import { postMyAddress } from "./fetchers";
 import { handleSubmit } from "./handleSubmit";
-import { checkPhoneNumber, ValidationError } from "./validations";
+import { checkPhoneNumber, ValidationErrorMessage } from "./validations";
 
 export const RegisterAddress = () => {
   const [postResult, setPostResult] = useState("");
@@ -20,7 +20,10 @@ export const RegisterAddress = () => {
                 setPostResult("登録に失敗しました");
               });
           } catch (err) {
-            if (err instanceof ValidationError) {
+            if (
+              err instanceof Error &&
+              err.message === ValidationErrorMessage
+            ) {
               setPostResult("不正な入力値が含まれています");
               return;
             }

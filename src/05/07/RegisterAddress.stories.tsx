@@ -9,10 +9,7 @@ import {
   inputContactNumber,
   inputDeliveryAddress,
 } from "./testingUtils";
-import {
-  checkPhoneNumber,
-  ValidationError as ValidationErrorClass,
-} from "./validations";
+import { checkPhoneNumber } from "./validations";
 
 const meta = {
   component: RegisterAddress,
@@ -84,24 +81,34 @@ export const ServerError: Story = {
   },
 };
 
-export const UnknownError: Story = {
-  beforeEach() {
-    mocked(checkPhoneNumber).mockImplementationOnce(() => {
-      throw new Error("Unknown Error");
+export const ValidationError: Story = {
+  beforeEach: () => {
+    mocked(checkPhoneNumber).mockImplementation(() => {
+      throw new Error("電話番号が不正です");
     });
   },
-  afterEach() {
-    try {
-      const mockedFn = mocked(checkPhoneNumber);
-      if (mockedFn.mockReset) {
-        mockedFn.mockReset();
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step(
+      "バリデーションエラー時「不正な入力値が含まれています」が表示される",
+      async () => {
+        await fillInvalidValuesAndSubmit(canvas);
+        await waitFor(() => {
+          expect(
+            canvas.getByText("不正な入力値が含まれています")
+          ).toBeInTheDocument();
+        });
       }
-      if (mockedFn.mockRestore) {
-        mockedFn.mockRestore();
-      }
-    } catch (e) {
-      // Function is not mocked
-    }
+    );
+  },
+};
+
+export const UnknownError: Story = {
+  beforeEach: () => {
+    mocked(checkPhoneNumber).mockImplementation(() => {
+      throw new Error("Unknown Error");
+    });
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
@@ -113,24 +120,6 @@ export const UnknownError: Story = {
         await waitFor(() => {
           expect(
             canvas.getByText("不明なエラーが発生しました")
-          ).toBeInTheDocument();
-        });
-      }
-    );
-  },
-};
-
-export const ValidationError: Story = {
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
-    await step(
-      "バリデーションエラー時「不正な入力値が含まれています」が表示される",
-      async () => {
-        await fillInvalidValuesAndSubmit(canvas);
-        await waitFor(() => {
-          expect(
-            canvas.getByText("不正な入力値が含まれています")
           ).toBeInTheDocument();
         });
       }
