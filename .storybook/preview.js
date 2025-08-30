@@ -1,4 +1,5 @@
 import { initialize, mswLoader } from "msw-storybook-addon";
+import { sb } from "storybook/test";
 
 // Initialize MSW with options to handle unmatched requests
 initialize({
@@ -22,6 +23,9 @@ initialize({
     print.warning();
   },
 });
+
+// Register modules for automatic mocking
+sb.mock(import("../src/05/07/validations"), { spy: true });
 
 /** @type { import('@storybook/react-vite').Preview } */
 const preview = {
