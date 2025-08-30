@@ -61,9 +61,8 @@ test("失敗時「登録に失敗しました」が表示される", async () =>
 });
 
 test("バリデーションエラー時「不正な入力値が含まれています」が表示される", async () => {
-  // これモックしてたら意味ない？と思ったけど、checkPhoneNumber関数自体はユニッををトテをを別でするか良いのか？
   vi.mocked(checkPhoneNumber).mockImplementation(() => {
-    throw new ValidationError("Invalid phone number");
+    throw new ValidationError("電話番号が不正です");
   });
 
   const screen = render(<RegisterAddress />);
