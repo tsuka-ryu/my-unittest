@@ -1,4 +1,4 @@
-import { fn, userEvent, within } from "storybook/test";
+import { userEvent, type within } from "storybook/test";
 
 export async function inputContactNumber(
   canvas: ReturnType<typeof within>,

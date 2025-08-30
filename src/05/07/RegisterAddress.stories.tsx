@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { HttpResponse, http } from "msw";
-import { expect, mocked, within } from "storybook/test";
+import { expect, mocked, waitFor, within } from "storybook/test";
 import { host } from "./fetchers";
 import { httpError, postMyAddressMock } from "./fetchers/fixtures";
 import { RegisterAddress } from "./RegisterAddress";
@@ -9,7 +9,10 @@ import {
   inputContactNumber,
   inputDeliveryAddress,
 } from "./testingUtils";
-import { checkPhoneNumber } from "./validations";
+import {
+  checkPhoneNumber,
+  ValidationError as ValidationErrorClass,
+} from "./validations";
 
 const meta = {
   component: RegisterAddress,
@@ -52,7 +55,9 @@ export const Success: Story = {
 
     await step("成功時「登録しました」が表示される", async () => {
       await fillValuesAndSubmit(canvas);
-      expect(canvas.getByText("登録しました")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(canvas.getByText("登録しました")).toBeInTheDocument();
+      });
     });
   },
 };
@@ -72,8 +77,46 @@ export const ServerError: Story = {
 
     await step("失敗時「登録に失敗しました」が表示される", async () => {
       await fillValuesAndSubmit(canvas);
-      expect(canvas.getByText("登録に失敗しました")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(canvas.getByText("登録に失敗しました")).toBeInTheDocument();
+      });
     });
+  },
+};
+
+export const UnknownError: Story = {
+  beforeEach() {
+    mocked(checkPhoneNumber).mockImplementationOnce(() => {
+      throw new Error("Unknown Error");
+    });
+  },
+  afterEach() {
+    try {
+      const mockedFn = mocked(checkPhoneNumber);
+      if (mockedFn.mockReset) {
+        mockedFn.mockReset();
+      }
+      if (mockedFn.mockRestore) {
+        mockedFn.mockRestore();
+      }
+    } catch (e) {
+      // Function is not mocked
+    }
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step(
+      "不明なエラー時「不明なエラーが発生しました」が表示される",
+      async () => {
+        await fillValuesAndSubmit(canvas);
+        await waitFor(() => {
+          expect(
+            canvas.getByText("不明なエラーが発生しました")
+          ).toBeInTheDocument();
+        });
+      }
+    );
   },
 };
 
@@ -85,30 +128,11 @@ export const ValidationError: Story = {
       "バリデーションエラー時「不正な入力値が含まれています」が表示される",
       async () => {
         await fillInvalidValuesAndSubmit(canvas);
-        expect(
-          canvas.getByText("不正な入力値が含まれています")
-        ).toBeInTheDocument();
-      }
-    );
-  },
-};
-
-export const UnknownError: Story = {
-  async beforeEach() {
-    mocked(checkPhoneNumber).mockImplementationOnce(() => {
-      throw new Error("Unknown Error");
-    });
-  },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
-    await step(
-      "不明なエラー時「不明なエラーが発生しました」が表示される",
-      async () => {
-        await fillValuesAndSubmit(canvas);
-        expect(
-          canvas.getByText("不明なエラーが発生しました")
-        ).toBeInTheDocument();
+        await waitFor(() => {
+          expect(
+            canvas.getByText("不正な入力値が含まれています")
+          ).toBeInTheDocument();
+        });
       }
     );
   },
