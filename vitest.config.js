@@ -11,6 +11,19 @@ const dirname =
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   test: {
+    coverage: {
+      exclude: [
+        "**/*.d.ts",
+        "**/type.ts",
+        "**/types.ts",
+        "**/mockServiceWorker.js",
+        "public/**",
+        "node_modules/**",
+        "**/*.config.*",
+        "**/*.stories.*",
+        ".storybook/**",
+      ],
+    },
     projects: [
       {
         extends: true,
@@ -34,7 +47,11 @@ export default defineConfig({
         test: {
           name: "unit",
           include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,tsx,jsx}"],
-          exclude: ["**/*.{stories}.{tsx}", "**/*.browser.test.*", "node_modules/**"],
+          exclude: [
+            "**/*.{stories}.{tsx}",
+            "**/*.browser.test.*",
+            "node_modules/**",
+          ],
           // browser modeを無効にして通常のNode.js環境でテスト実行
         },
       },
